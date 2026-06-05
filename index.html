@@ -66,10 +66,21 @@
       {name: 'Vatten', icon: 'assets/vatten-ikon.png', marker: 'assets/vatten-markor.png', url: ''},
     ]
 
+    // Admin-läge: öppna menyn med ?admin=KODEN → koden skickas vidare till varje
+    // skulptur (?admin=KODEN) så man kan placera/SPARA, och skulpturen kommer
+    // tillbaka hit. Besökare som scannar QR:en (utan ?admin) ser vanliga menyn.
+    const ADMIN = new URLSearchParams(location.search).get('admin')
+
     const grid   = document.getElementById('grid')
     const go      = document.getElementById('go')
     const goImg   = document.getElementById('go-img')
     const goName  = document.getElementById('go-name')
+
+    if (ADMIN) {
+      const t = document.getElementById('title')
+      t.textContent = 'ADMIN — välj skulptur att placera'
+      t.style.color = 'rgba(255, 180, 80, 1)'
+    }
 
     SCULPTURES.forEach(s => {
       const b = document.createElement('button')
@@ -89,9 +100,16 @@
       goImg.src = s.marker
       goImg.onerror = () => { goImg.style.display = 'none' }
       go.classList.add('on')
-      setTimeout(navigate, 2200)                // visa "Scanna X" ~2s, gå sedan vidare
+      // I admin-läge hoppar vi vidare snabbt (man kalibrerar, slipper vänta).
+      setTimeout(navigate, ADMIN ? 600 : 2200)
     }
-    function navigate() { if (pendingUrl) location.href = pendingUrl }
+    function navigate() {
+      if (!pendingUrl) return
+      let url = pendingUrl
+      // Skicka admin-koden vidare till skulpturen så placera/SPARA är på.
+      if (ADMIN) url += (url.includes('?') ? '&' : '?') + 'admin=' + encodeURIComponent(ADMIN)
+      location.href = url
+    }
     go.addEventListener('click', navigate)      // tryck för att hoppa direkt
   </script>
 </body>

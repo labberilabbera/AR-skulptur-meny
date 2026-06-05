@@ -20,6 +20,13 @@ Redigera `SCULPTURES` i `index.html`:
 - Tom `url` = skulpturen visas nedtonad och går inte att välja (ej klar än).
 - Lägg ikon-/markörbilderna i `assets/`.
 
+## Admin-läge (placera AR på plats)
+Öppna menyn med **`?admin=KOD`** (samma kod som skulpturernas `ADMIN_PASSCODE`).
+Då skickas `?admin=KOD` vidare till vald skulptur (= placera + SPARA på), menyn
+hoppar vidare snabbare, och titeln visar "ADMIN". Skulptur-appen kommer tillbaka hit
+(med `?admin=KOD`) efter SPARA/✕ → välj nästa skulptur. Besökare (utan `?admin`) ser
+vanliga menyn. QR-koden ska peka på menyn UTAN `?admin`.
+
 ## Hör ihop med skulptur-apparna (separata repon)
 - Varje skulptur är ett eget repo/Vercel-projekt (kopia av "Eld"-projektet).
 - Skulptur-appen visar själv "Scanna X" + gör AR:et, och ska gå **tillbaka hit**
