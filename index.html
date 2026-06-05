@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Skulptur AR — Välj upplevelse</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; height: 100%; background: #0a0a0c; color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent; user-select: none;
+    }
+    #menu {
+      min-height: 100%; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 36px; padding: 48px 24px;
+    }
+    #title { font-size: 20px; font-weight: 300; letter-spacing: 0.14em; opacity: 0.85; text-align: center; }
+    #grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; align-items: flex-start; }
+    .item {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      cursor: pointer; border: none; background: none; color: inherit; padding: 0;
+    }
+    .item img {
+      width: 150px; height: 150px; object-fit: contain;
+      filter: drop-shadow(0 0 26px rgba(255, 120, 20, 0.35)); transition: transform 0.2s;
+    }
+    .item:active img { transform: scale(0.93); }
+    .item .label { font-size: 17px; letter-spacing: 0.08em; font-weight: 300; }
+    .item.disabled { opacity: 0.4; }
+
+    /* Övergångs-overlay vid val: markörbild (transparent) + "Scanna X" */
+    #go {
+      position: fixed; inset: 0; z-index: 100; background: rgba(0, 0, 0, 0.93);
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      gap: 28px; padding: 0 32px; text-align: center;
+    }
+    #go.on { display: flex; }
+    #go img { width: 240px; max-width: 70vw; opacity: 0.5; border-radius: 14px; }
+    #go p { font-size: 20px; font-weight: 300; letter-spacing: 0.05em; margin: 0; }
+    #go b { color: rgba(255, 180, 80, 1); font-weight: 500; }
+    #go small { opacity: 0.55; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div id="menu">
+    <div id="title">Välj skulptur</div>
+    <div id="grid"></div>
+  </div>
+
+  <div id="go">
+    <img id="go-img" alt="">
+    <p>Scanna <b id="go-name"></b></p>
+    <small>Tryck för att fortsätta…</small>
+  </div>
+
+  <script>
+    // ── Konfiguration: en post per skulptur ─────────────────────────────────
+    //   name   = visas i menyn och på "Scanna X"-skärmen
+    //   icon   = symbol i menyn (urklippt PNG) → lägg i assets/
+    //   marker = bildmåls-bilden som visas vid val (transparent) → lägg i assets/
+    //   url    = skulpturens egen Vercel-deploy (tom = inte klar än)
+    const SCULPTURES = [
+      {name: 'Eld',    icon: 'assets/eld-ikon.png',    marker: 'assets/eld-markor.png',    url: 'https://skulptur-ar.vercel.app/'},
+      {name: 'Vind',   icon: 'assets/vind-ikon.png',   marker: 'assets/vind-markor.png',   url: ''},
+      {name: 'Vatten', icon: 'assets/vatten-ikon.png', marker: 'assets/vatten-markor.png', url: ''},
+    ]
+
+    const grid   = document.getElementById('grid')
+    const go      = document.getElementById('go')
+    const goImg   = document.getElementById('go-img')
+    const goName  = document.getElementById('go-name')
+
+    SCULPTURES.forEach(s => {
+      const b = document.createElement('button')
+      b.className = 'item' + (s.url ? '' : ' disabled')
+      b.innerHTML =
+        '<img src="' + s.icon + '" alt="' + s.name + '" onerror="this.style.opacity=0.25">' +
+        '<span class="label">' + s.name + '</span>'
+      b.addEventListener('click', () => select(s))
+      grid.appendChild(b)
+    })
+
+    let pendingUrl = null
+    function select(s) {
+      if (!s.url) { return }                    // inte klar än → gör inget
+      pendingUrl = s.url
+      goName.textContent = s.name
+      goImg.src = s.marker
+      goImg.onerror = () => { goImg.style.display = 'none' }
+      go.classList.add('on')
+      setTimeout(navigate, 2200)                // visa "Scanna X" ~2s, gå sedan vidare
+    }
+    function navigate() { if (pendingUrl) location.href = pendingUrl }
+    go.addEventListener('click', navigate)      // tryck för att hoppa direkt
+  </script>
+</body>
+</html>
